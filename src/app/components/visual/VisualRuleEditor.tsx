@@ -153,9 +153,9 @@ export const VisualRuleEditor = ({ rule, onChange }: VisualRuleEditorProps) => {
   }, [deletePressed, selectedNodeId]);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
-      <div className="flex-1 relative flex overflow-hidden">
-        <div className="flex-1 relative">
+    <div className="flex flex-col lg:flex-row h-full min-h-0 w-full bg-slate-50 overflow-hidden font-sans">
+      <div className="flex-1 relative flex min-h-0 overflow-hidden">
+        <div className="flex-1 relative min-h-0">
           <ReactFlow
             nodes={nodes}
             edges={edges}

@@ -30,8 +30,8 @@ export const NodeInspector = ({ nodeId, rule, onChange, onClose }: NodeInspector
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 300, opacity: 0 }}
       className={cn(
-        'bg-white border-l border-slate-200/60 flex flex-col shadow-[-12px_0_30px_rgba(0,0,0,0.04)] z-20',
-        'fixed inset-x-0 bottom-0 max-h-[80vh] rounded-t-3xl md:static md:h-full md:max-h-none md:w-[360px]'
+        'bg-white border-l border-slate-200/60 flex flex-col shadow-[-12px_0_30px_rgba(0,0,0,0.04)] z-20 overflow-hidden min-h-0',
+        'fixed inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl md:static md:h-full md:max-h-none md:w-[360px]'
       )}
     >
       <div className="p-6 border-b border-slate-100 flex items-center justify-between">

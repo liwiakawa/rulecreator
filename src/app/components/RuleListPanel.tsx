@@ -14,6 +14,7 @@ interface RuleListPanelProps {
   userEmail?: string | null;
   onSignOut?: () => void;
   className?: string;
+  adminActions?: React.ReactNode;
 }
 
 export const RuleListPanel: React.FC<RuleListPanelProps> = ({
@@ -27,6 +28,7 @@ export const RuleListPanel: React.FC<RuleListPanelProps> = ({
   userEmail,
   onSignOut,
   className,
+  adminActions,
 }) => {
   const [query, setQuery] = React.useState('');
 
@@ -41,7 +43,7 @@ export const RuleListPanel: React.FC<RuleListPanelProps> = ({
   return (
     <aside
       className={cn(
-        'w-full lg:w-72 xl:w-80 border-r border-slate-200 bg-white h-full flex flex-col',
+        'w-full lg:w-72 xl:w-80 border-r border-slate-200 bg-white h-full min-h-0 flex flex-col overflow-hidden',
         className
       )}
     >
@@ -72,9 +74,13 @@ export const RuleListPanel: React.FC<RuleListPanelProps> = ({
             Tryb tylko do odczytu — zapisy dostępne tylko dla admina.
           </div>
         )}
+
+        {adminActions && (
+          <div className="pt-2 border-t border-slate-100">{adminActions}</div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2">
         {filtered.map((rule) => {
           const active = rule.id === activeRuleId;
           return (

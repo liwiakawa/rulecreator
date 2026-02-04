@@ -1,7 +1,7 @@
 import React from 'react';
-import { supabase } from '@/lib/supabaseClient';
 import { TriggerRule } from '@/app/types';
 import { Sparkles } from 'lucide-react';
+import { ruleService } from '@/app/services/ruleService';
 
 interface RuleGeneratorProps {
   onGenerate: (rule: TriggerRule) => void;
@@ -16,10 +16,6 @@ export const RuleGenerator: React.FC<RuleGeneratorProps> = ({ onGenerate }) => {
   const handleGenerate = async () => {
     setError(null);
     setInfo(null);
-    if (!supabase) {
-      setError('Supabase nie jest skonfigurowany.');
-      return;
-    }
     if (!prompt.trim()) {
       setError('Opisz regułę, którą chcesz wygenerować.');
       return;
@@ -27,19 +23,7 @@ export const RuleGenerator: React.FC<RuleGeneratorProps> = ({ onGenerate }) => {
 
     setLoading(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('generate-rule', {
-        body: { prompt },
-      });
-
-      if (fnError) {
-        throw fnError;
-      }
-
-      const rule = data?.rule || data;
-      if (!rule || typeof rule !== 'object') {
-        throw new Error('Nie udało się odczytać reguły z odpowiedzi.');
-      }
-
+      const rule = await ruleService.generateFromPrompt(prompt);
       onGenerate(rule as TriggerRule);
       setInfo('Reguła wygenerowana.');
       setPrompt('');
