@@ -13,6 +13,7 @@ interface AuthContextValue {
   status: AuthStatus;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  canManageInvites: boolean;
   refreshRole: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -108,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     status,
     isAdmin: role === 'admin' || role === 'super_admin',
     isSuperAdmin: role === 'super_admin',
+    canManageInvites: role === 'invites' || role === 'super_admin',
     refreshRole,
     signOut,
   };

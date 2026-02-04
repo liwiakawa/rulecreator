@@ -1,8 +1,11 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') ?? 'no-reply@yourdomain.com';
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') ?? 'http://localhost:5173';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
 serve(async (req) => {
   if (req.method !== 'POST') {
@@ -10,6 +13,39 @@ serve(async (req) => {
   }
 
   try {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return new Response(JSON.stringify({ sent: false, error: 'Missing Supabase config' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ sent: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userData.user.id)
+      .maybeSingle();
+    if (roleError || !roleData || !['invites', 'super_admin'].includes(roleData.role)) {
+      return new Response(JSON.stringify({ sent: false, error: 'Forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { email, token, role } = await req.json();
     if (!email || !token) {
       return new Response(JSON.stringify({ sent: false, error: 'Missing email or token' }), {

@@ -4,7 +4,7 @@ create extension if not exists "citext";
 
 create table if not exists public.user_roles (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  role text not null check (role in ('admin', 'super_admin')),
+  role text not null check (role in ('admin', 'super_admin', 'invites')),
   created_at timestamptz not null default now(),
   created_by uuid references auth.users(id)
 );
@@ -45,6 +45,17 @@ as $$
   );
 $$;
 
+create or replace function public.can_manage_invites()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1 from public.user_roles ur
+    where ur.user_id = auth.uid() and ur.role in ('invites', 'super_admin')
+  );
+$$;
+
 alter table public.user_roles enable row level security;
 alter table public.invites enable row level security;
 
@@ -68,25 +79,25 @@ create policy "user_roles_super_admin_delete" on public.user_roles
   for delete
   using (public.is_super_admin());
 
-drop policy if exists "invites_super_admin_select" on public.invites;
-create policy "invites_super_admin_select" on public.invites
+drop policy if exists "invites_managers_select" on public.invites;
+create policy "invites_managers_select" on public.invites
   for select
-  using (public.is_super_admin());
+  using (public.can_manage_invites());
 
-drop policy if exists "invites_super_admin_insert" on public.invites;
-create policy "invites_super_admin_insert" on public.invites
+drop policy if exists "invites_managers_insert" on public.invites;
+create policy "invites_managers_insert" on public.invites
   for insert
-  with check (public.is_super_admin());
+  with check (public.can_manage_invites());
 
-drop policy if exists "invites_super_admin_update" on public.invites;
-create policy "invites_super_admin_update" on public.invites
+drop policy if exists "invites_managers_update" on public.invites;
+create policy "invites_managers_update" on public.invites
   for update
-  using (public.is_super_admin());
+  using (public.can_manage_invites());
 
-drop policy if exists "invites_super_admin_delete" on public.invites;
-create policy "invites_super_admin_delete" on public.invites
+drop policy if exists "invites_managers_delete" on public.invites;
+create policy "invites_managers_delete" on public.invites
   for delete
-  using (public.is_super_admin());
+  using (public.can_manage_invites());
 
 create or replace function public.validate_invite(p_token text, p_email text)
 returns boolean

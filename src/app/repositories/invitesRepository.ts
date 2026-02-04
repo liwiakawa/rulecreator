@@ -7,6 +7,15 @@ const getClient = () => {
 };
 
 export const invitesRepository = {
+  async list(): Promise<InviteRecord[]> {
+    const client = getClient();
+    const { data, error } = await client
+      .from('invites')
+      .select('id, email, role, token, invited_by, created_at, used_at, revoked_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data || []) as InviteRecord[];
+  },
   async createInvite(email: string, role: UserRole): Promise<InviteRecord> {
     const client = getClient();
     const { data, error } = await client
@@ -16,6 +25,14 @@ export const invitesRepository = {
       .single();
     if (error) throw error;
     return data as InviteRecord;
+  },
+  async revokeInvite(id: string): Promise<void> {
+    const client = getClient();
+    const { error } = await client
+      .from('invites')
+      .update({ revoked_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw error;
   },
   async validateInvite(token: string, email: string): Promise<boolean> {
     const client = getClient();

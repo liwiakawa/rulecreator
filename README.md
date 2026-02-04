@@ -13,8 +13,9 @@
 
   This project uses invite-only registration with roles:
 
-  - `super_admin`: can invite new admins
-  - `admin`: can manage rules
+  - `super_admin`: pełny dostęp, zaproszenia i reguły
+  - `admin`: zarządzanie regułami
+  - `invites`: zarządzanie zaproszeniami
 
   Apply the SQL migration in `supabase/migrations/20260204_0001_auth_roles_invites.sql`.
 
@@ -36,4 +37,6 @@
   - `RESEND_API_KEY`
   - `RESEND_FROM_EMAIL`
   - `APP_BASE_URL` (e.g. `https://your-domain.com`)
+
+  Panel zaproszeń jest pod `/invites` i jest dostępny dla ról `invites` oraz `super_admin`.
   

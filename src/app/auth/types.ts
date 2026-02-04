@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'super_admin';
+export type UserRole = 'admin' | 'super_admin' | 'invites';
 
 export interface InviteRecord {
   id: string;
